@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+*.log
+
+# Virtual environment
+venv/
+.env/
+
+# FastAPI / Uvicorn
+*.pid
+
+# SQLite database
+*.db
+*.sqlite3
+
+# Migrations cache
+alembic.ini
+alembic/versions/__pycache__/
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/
+
+# Node (if later you add React frontend)
+node_modules/
+dist/
+build/
+
+# Tests cache
+.pytest_cache/
+
+# Coverage
+.coverage
+htmlcov/
+
+# Secrets
+*.env
+*.key
+*.pem
