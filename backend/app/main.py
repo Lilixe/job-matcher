@@ -26,7 +26,7 @@ def root():
 #    return crud.create_job(db, job)
 
 @app.post("/scrape/wanted")
-def scrape_wanted(limit: int = 20, db: Session = Depends(get_db)):
+def scrape_wanted(limit: int = 30, min_score: float = 50.0, db: Session = Depends(get_db)):
     jobs = scrape_wanted_jobs(limit=limit)
 
     inserted = 0
@@ -42,7 +42,7 @@ def scrape_wanted(limit: int = 20, db: Session = Depends(get_db)):
 
         score = compute_score(merged_skills)
 
-        status = "fit" if score >= 50 else "unfit" 
+        status = "fit" if score >= min_score else "unfit" 
         
         offer = JobCreate(source="wanted",title=job["title"],company=job["company"],url=job["url"],skills=", ".join(merged_skills),score=score,status=status)
         crud.create_job(db, offer)

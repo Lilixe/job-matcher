@@ -27,7 +27,16 @@ def scrape_wanted_jobs(limit: int = 20) -> list[dict]:
 
     jobs = []
     for job in data.get("data", []):
+        category_tags = job.get("category_tags", [])
+        if not any(t.get("parent_id") == 518 for t in category_tags):
+            continue
+        
         job_id = job.get("id")
+        
+        print("TITLE:", job.get("position"))
+        print("CATEGORY TAGS:", job.get("category_tags"))
+        print("SKILL TAGS:", job.get("skill_tags"))
+        print("----------")
 
         jobs.append({
             "id": job_id,

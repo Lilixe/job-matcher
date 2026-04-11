@@ -13,7 +13,9 @@ st.sidebar.header("Controls")
 min_score = st.sidebar.slider("Minimum match score (%)", 0, 100, 50)
 
 if st.sidebar.button("Scrape Wanted Jobs"):
-    r = requests.post(f"{API_URL}/scrape/wanted?limit=30")
+    r = requests.post(f"{API_URL}/scrape/wanted", params={
+                      "limit":30,
+                      "min_score": min_score})
     if r.status_code == 200:
         st.sidebar.success("Wanted scraping done!")
     else:
