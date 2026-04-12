@@ -14,3 +14,10 @@ class JobApplication(Base):
     score = Column(Float,nullable=False)
     status = Column(String, nullable=False, default="fit")
     created_at = Column(DateTime, default=datetime.utcnow)
+    
+class UserSkills(Base):
+    __tablename__ = "user_skills"
+
+    id = Column(Integer, primary_key=True, index=True)
+    skill = Column(String, unique=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)

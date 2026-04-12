@@ -4,6 +4,8 @@ from typing import Literal
 
 StatusType = Literal["applied", "interview", "offer", "rejected","unfit", "fit"]
 
+#JOB
+
 class JobCreate(BaseModel):
     title : str
     source : str
@@ -29,4 +31,16 @@ class JobResponse(BaseModel):
 
     class Config:
         from_attributes = True
-       
+
+#SKILLS
+
+class UserSkill(BaseModel):
+    skill : str
+    
+class SkillResponse(BaseModel):
+    id : int
+    skill : str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

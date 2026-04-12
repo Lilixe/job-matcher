@@ -9,17 +9,19 @@ st.set_page_config(page_title="Job Match Dashboard", layout="wide")
 st.title("Job Match Dashboard")
 
 # Sidebar controls
-st.sidebar.header("Controls")
 min_score = st.sidebar.slider("Minimum match score (%)", 0, 100, 50)
 
 if st.sidebar.button("Scrape Wanted Jobs"):
-    r = requests.post(f"{API_URL}/scrape/wanted", params={
-                      "limit":30,
-                      "min_score": min_score})
+    r = requests.post(
+        f"{API_URL}/scrape/wanted",
+        params={"limit": 30, "min_score": min_score}
+    )
+
     if r.status_code == 200:
         st.sidebar.success("Wanted scraping done!")
     else:
         st.sidebar.error("Scraping failed")
+
 
 # Fetch jobs
 r = requests.get(f"{API_URL}/jobs", params={"score": min_score})
@@ -59,7 +61,7 @@ for job in jobs:
     with col4:
         st.link_button("Open Job", job["url"])
 
-        if st.button(f"Mark Applied #{job['id']}"):
+        if st.button(f"Mark Applied #{job['id']}", key=f"apply_{job['id']}"):
             patch = requests.patch(
                 f"{API_URL}/jobs/{job['id']}",
                 json={"status": "applied"}

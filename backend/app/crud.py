@@ -1,6 +1,11 @@
 from sqlalchemy.orm import Session
 from .models import JobApplication
+from .models import UserSkills
 from .schemas import JobCreate
+from .schemas import UserSkill
+
+
+#JOBS
 
 def create_job(db: Session, job: JobCreate):
     existing = db.query(JobApplication).filter(JobApplication.url == job.url).first() # type: ignore
@@ -52,3 +57,52 @@ def update_job_status(db: Session, job_id: int, new_status: str):
     db.commit()
     db.refresh(job)
     return job
+
+# SKILLS
+
+def add_skill(db: Session, skill: str):
+    
+    existing = db.query(UserSkills).filter(UserSkills.skill == skill).first() # type: ignore
+    if existing:
+        return existing
+    
+    new_skill = UserSkills(
+        skill=skill
+    )
+    db.add(new_skill)
+    db.commit()
+    db.refresh(new_skill)
+    return new_skill
+
+def add_skills_bulk(db: Session, skills: list[str]) -> int:
+    inserted = 0
+
+    for skill in skills:
+        skill = skill.strip().lower()
+        if not skill:
+            continue
+
+        existing = db.query(UserSkills).filter(UserSkills.skill == skill).first()
+        if not existing:
+            db.add(UserSkills(skill=skill))
+            inserted += 1
+
+    db.commit()
+    return inserted
+
+def get_skills(db: Session): # type: ignore
+    query = db.query(UserSkills)
+    return query.order_by(UserSkills.created_at.desc()).all()
+
+def delete_all_skills(db: Session):
+    db.query(UserSkills).delete()
+    db.commit()
+
+def delete_skill(db: Session, skill_id: int):
+    skill = db.query(UserSkills).filter(UserSkills.id == skill_id).first()
+    if skill is None:
+        return None
+    db.delete(skill)
+    db.commit()
+    return skill
+
