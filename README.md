@@ -84,11 +84,16 @@ job-match-dashboard/
 └── README.md
 ```
 
-### ⚙️ Installation
-- 1. Clone the repository
+## ⚙️ Installation
+
+1. Clone the repository
+     
 git clone https://github.com/YOUR_USERNAME/job-matcher.git
+
 cd job-matcher
-- 2. Create virtual environment
+
+2. Create virtual environment
+
 python -m venv venv
 
 Activate it:
@@ -100,11 +105,17 @@ venv\Scripts\activate
 Mac/Linux
 
 source venv/bin/activate
-- 3. Install dependencies
+
+3. Install dependencies
+   
 pip install -r requirements.txt
-▶️ Running the App
-- 1. Start the FastAPI backend
+
+### ▶️ Running the App
+
+1. Start the FastAPI backend
+   
 cd backend
+
 uvicorn app.main:app --reload
 
 Backend runs at:
@@ -114,11 +125,13 @@ http://127.0.0.1:8000
 Docs available at:
 
 http://127.0.0.1:8000/docs
-- 2. Start the Streamlit frontend
+
+2. Start the Streamlit frontend
 
 In a second terminal:
 
 cd frontend
+
 streamlit run Home.py
 
 Frontend runs at:
@@ -139,7 +152,9 @@ Step 3: Filter by match score
 Use the slider to filter jobs by minimum match score.
 
 Step 4: Apply & Track
+
 Open job posting using the Open Job button
+
 Click Mark Applied to update the job status in the database
 
 ### 📌 Planned Improvements
@@ -153,6 +168,6 @@ Click Mark Applied to update the job status in the database
 This project is for educational and personal use only.
 Some job websites may block scraping depending on rate limits or bot detection.
 
-### 👤 Author
+## 👤 Author
 
 Built by Patrick Bastard
