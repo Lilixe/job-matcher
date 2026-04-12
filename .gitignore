@@ -49,3 +49,6 @@ htmlcov/
 *.env
 *.key
 *.pem
+
+# Files
+.pdf
