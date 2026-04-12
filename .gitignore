@@ -51,4 +51,4 @@ htmlcov/
 *.pem
 
 # Files
-.pdf
+*.pdf
