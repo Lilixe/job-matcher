@@ -82,6 +82,7 @@ job-match-dashboard/
 ├── requirements.txt
 ├── .gitignore
 └── README.md
+```
 
 ### ⚙️ Installation
 1. Clone the repository
