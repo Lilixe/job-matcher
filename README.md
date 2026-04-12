@@ -62,25 +62,29 @@ Built with **FastAPI + SQLite + Streamlit**.
 job-match-dashboard/
 │
 ├── backend/
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── crud.py
-│   │   ├── database.py
-│   │   ├── models.py
-│   │   ├── schemas.py
-│   │   ├── scoring.py
-│   │   ├── skills_parser.py
-│   │   └── scraper/
-│   │       └── wanted.py
-│   └── jobs.db
+│   └── app/
+│       ├── main.py
+│       ├── crud.py
+│       ├── debs.py
+│       ├── database.py
+│       ├── models.py
+│       ├── schemas.py
+│       ├── scraper/
+│       │   ├── wanted.py
+│       │   ├── scoring.py
+│       │   ├── skills.py
+│       │   └── skill_extract.py
+│       └── utils/
+│           └── resume_parser.py
 │
 ├── frontend/
-│   ├── Home.py
+│   ├── Dashboard.py
 │   └── pages/
 │       └── 2_Skills.py
 │
 ├── requirements.txt
 ├── .gitignore
+├── jobs.db
 └── README.md
 ```
 
