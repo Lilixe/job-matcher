@@ -1,7 +1,8 @@
 import requests
-import re
+from .skill_extract import flatten_text
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
+
 
 def scrape_wanted_jobs(limit: int = 20) -> list[dict]:
     url = "https://www.wanted.co.kr/api/v4/jobs"
@@ -11,32 +12,21 @@ def scrape_wanted_jobs(limit: int = 20) -> list[dict]:
         "job_sort": "job.latest_order",
         "limit": limit,
         "offset": 0,
-
-        # Software Engineering category tag
-        "job_category_tag": "518"  
+        "job_category_tag": "518"
     }
 
     r = requests.get(url, headers=HEADERS, params=params, timeout=10)
     r.raise_for_status()
 
     data = r.json()
-    #print("TOP LEVEL KEYS:", data.keys())
-    #print("JOB KEYS:", data.get("job", {}).keys())
-    #print("JOB RAW:", data.get("job", {}))
-    #raise Exception("job")
 
     jobs = []
     for job in data.get("data", []):
         category_tags = job.get("category_tags", [])
         if not any(t.get("parent_id") == 518 for t in category_tags):
             continue
-        
+
         job_id = job.get("id")
-        
-        print("TITLE:", job.get("position"))
-        print("CATEGORY TAGS:", job.get("category_tags"))
-        print("SKILL TAGS:", job.get("skill_tags"))
-        print("----------")
 
         jobs.append({
             "id": job_id,
@@ -47,9 +37,6 @@ def scrape_wanted_jobs(limit: int = 20) -> list[dict]:
 
     return jobs
 
-
-import requests
-import re
 
 def fetch_wanted_details(job_id: int) -> tuple[str, list[str]]:
     url = f"https://www.wanted.co.kr/api/v4/jobs/{job_id}"
@@ -67,24 +54,10 @@ def fetch_wanted_details(job_id: int) -> tuple[str, list[str]]:
     data = r.json()
     job = data.get("job", {})
 
-    # ---- DESCRIPTION ----
+    # raw detail (string/dict)
     detail = job.get("detail", "")
-    parts = []
+    description = flatten_text(detail)
 
-    if isinstance(detail, dict):
-        for v in detail.values():
-            if isinstance(v, str):
-                parts.append(v)
-
-    elif isinstance(detail, str):
-        parts.append(detail)
-
-    description = " ".join(parts)
-
-    description = re.sub(r"<[^>]+>", " ", description)
-    description = re.sub(r"\s+", " ", description).strip()
-
-    # ---- SKILL TAGS ----
     tags = job.get("skill_tags", [])
     skill_tags = [t["title"].lower() for t in tags if isinstance(t, dict) and "title" in t]
 

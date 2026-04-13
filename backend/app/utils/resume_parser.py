@@ -1,8 +1,9 @@
+import io
 from pypdf import PdfReader
 
 
-def extract_text_from_pdf(file_path: str) -> str:
-    reader = PdfReader(file_path)
+def extract_text_from_pdf(file_bytes: bytes) -> str:
+    reader = PdfReader(io.BytesIO(file_bytes))
     text = ""
 
     for page in reader.pages:
@@ -10,4 +11,4 @@ def extract_text_from_pdf(file_path: str) -> str:
         if page_text:
             text += page_text + "\n"
 
-    return text
+    return text.strip()

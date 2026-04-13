@@ -1,13 +1,9 @@
-import os
-import shutil
-
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 
 from .database import Base, engine
 from .schemas import JobCreate, JobResponse, JobUpdateStatus, UserSkill, SkillResponse
 from .deps import get_db
-from .models import UserSkills
 from . import crud
 from typing import Optional
 
@@ -25,8 +21,7 @@ app = FastAPI(title="Job Tracker API")
 
 @app.get("/")
 def root():
-    return {"message": "Job Tracker API running"}
-
+    return {"message": "API running"}
 
 #@app.post("/jobs", response_model=JobResponse)
 #def create_job(job: JobCreate, db: Session = Depends(get_db)):
@@ -36,26 +31,32 @@ def root():
 def scrape_wanted(limit: int = 30, min_score: float = 50.0, db: Session = Depends(get_db)):
     jobs = scrape_wanted_jobs(limit=limit)
 
+    skills_db = crud.get_skills(db)
+    my_skills = [s.skill for s in skills_db]
+
     inserted = 0
 
     for job in jobs:
-        # For MVP, we use title only as "text"
         desc, wanted_tags = fetch_wanted_details(job["id"])
 
-        text = job["title"] + " " + desc
-        parsed_skills = extract_skills(text)
-
-        merged_skills = sorted(set(parsed_skills) | set(wanted_tags))
-        skills_db = crud.get_skills(db)
-        my_skills = [s.skill for s in skills_db]
+        combined_text = f"{job['title']} {desc} {' '.join(wanted_tags)}"
+        merged_skills = extract_skills(combined_text)
 
         score = compute_score(merged_skills, my_skills) # type: ignore
 
-        status = "fit" if score >= min_score else "unfit" 
-        
-        offer = JobCreate(source="wanted",title=job["title"],company=job["company"],url=job["url"],skills=", ".join(merged_skills),score=score,status=status)
-        crud.create_job(db, offer)
+        status = "fit" if score >= min_score else "unfit"
 
+        offer = JobCreate(
+            source="wanted",
+            title=job["title"],
+            company=job["company"],
+            url=job["url"],
+            skills=", ".join(merged_skills),
+            score=score,
+            status=status
+        )
+
+        crud.create_job(db, offer)
         inserted += 1
 
     return {"scraped": len(jobs), "inserted": inserted}
@@ -98,18 +99,14 @@ def list_skills(db: Session = Depends(get_db)):
     return crud.get_skills(db) # type: ignore
 
 @app.post("/skills/from-resume")
-def skills_from_resume(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def skills_from_resume(file: UploadFile = File(...), db: Session = Depends(get_db)):
 
     if not file.filename.endswith(".pdf"): # type: ignore
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
-
-    os.makedirs("uploads", exist_ok=True)
-    file_path = f"uploads/{file.filename}"
-
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    text = extract_text_from_pdf(file_path)
+    
+    
+    file_bytes = await file.read()
+    text = extract_text_from_pdf(file_bytes)
     found_skills = extract_skills(text)
 
     inserted = crud.add_skills_bulk(db, found_skills)

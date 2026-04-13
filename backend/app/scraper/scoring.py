@@ -48,12 +48,12 @@
 # }
 
 
-def compute_score(job_skills: list[str], my_skills: list[str]) -> float:
+def compute_score(job_skills: list[str], user_skills: list[str]) -> float:
     job_set = set(job_skills)
-    my_set = set(my_skills)
+    user_set = set(user_skills)
 
     if not job_set:
         return 0.0
 
-    match = job_set.intersection(my_set)
+    match = job_set.intersection(user_set)
     return round((len(match) / len(job_set)) * 100, 2)

@@ -85,23 +85,21 @@ job-match-dashboard/
 ```
 
 ### ⚙️ Installation
-1. Clone the repository
+1. Clone the repository : 
 git clone https://github.com/YOUR_USERNAME/job-matcher.git
 cd job-matcher
-2. Create virtual environment
+2. Create virtual environment : 
 python -m venv venv
 
 Activate it:
 
-Windows
+Windows : venv\Scripts\activate
 
-venv\Scripts\activate
+Mac/Linux : source venv/bin/activate
 
-Mac/Linux
-
-source venv/bin/activate
-3. Install dependencies
+3. Install dependencies : 
 pip install -r requirements.txt
+
 ▶️ Running the App
 1. Start the FastAPI backend
 cd backend
@@ -114,6 +112,7 @@ http://127.0.0.1:8000
 Docs available at:
 
 http://127.0.0.1:8000/docs
+
 2. Start the Streamlit frontend
 
 In a second terminal:

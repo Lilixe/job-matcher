@@ -56,12 +56,12 @@ SKILL_PATTERNS = {
     # --- Programming Languages ---
     "python": [r"\bpython\b", r"파이썬"],
     "java": [r"\bjava\b", r"자바"],
-    "c": [r"\bc\b", r"\bc language\b"],
+    "c": [r"\bc\b(?!\+\+|#)", r"\bc language\b"],
     "c++": [r"\bc\+\+\b", r"cpp", r"\bc plus plus\b"],
     "c#": [r"\bc#\b", r"\bcsharp\b", r"\bc sharp\b"],
     "javascript": [r"\bjavascript\b", r"\bjs\b", r"자바스크립트"],
     "typescript": [r"\btypescript\b", r"\bts\b"],
-    "go": [r"\bgo\b", r"\bgolang\b"],
+    "go": [r"\bgolang\b", r"\bgo language\b"],
     "rust": [r"\brust\b"],
     "kotlin": [r"\bkotlin\b"],
     "swift": [r"\bswift\b"],
@@ -102,7 +102,7 @@ SKILL_PATTERNS = {
     "sqlite": [r"\bsqlite\b"],
     "mongodb": [r"\bmongodb\b", r"\bmongo\b"],
     "redis": [r"\bredis\b"],
-    "elasticsearch": [r"\belasticsearch\b", r"\bes\b"],
+    "elasticsearch": [r"\belasticsearch\b"],
 
     # --- Data / ML ---
     "pandas": [r"\bpandas\b"],

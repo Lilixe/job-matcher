@@ -61,14 +61,15 @@ def update_job_status(db: Session, job_id: int, new_status: str):
 # SKILLS
 
 def add_skill(db: Session, skill: str):
-    
-    existing = db.query(UserSkills).filter(UserSkills.skill == skill).first() # type: ignore
+    skill = skill.strip().lower()
+    if not skill:
+        return None
+
+    existing = db.query(UserSkills).filter(UserSkills.skill == skill).first()
     if existing:
         return existing
-    
-    new_skill = UserSkills(
-        skill=skill
-    )
+
+    new_skill = UserSkills(skill=skill)
     db.add(new_skill)
     db.commit()
     db.refresh(new_skill)
