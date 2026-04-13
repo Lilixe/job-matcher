@@ -62,31 +62,36 @@ Built with **FastAPI + SQLite + Streamlit**.
 job-match-dashboard/
 │
 ├── backend/
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── crud.py
-│   │   ├── database.py
-│   │   ├── models.py
-│   │   ├── schemas.py
-│   │   ├── scoring.py
-│   │   ├── skills_parser.py
-│   │   └── scraper/
-│   │       └── wanted.py
-│   └── jobs.db
+│   └── app/
+│       ├── main.py
+│       ├── crud.py
+│       ├── debs.py
+│       ├── database.py
+│       ├── models.py
+│       ├── schemas.py
+│       ├── scraper/
+│       │   ├── wanted.py
+│       │   ├── scoring.py
+│       │   ├── skills.py
+│       │   └── skill_extract.py
+│       └── utils/
+│           └── resume_parser.py
 │
 ├── frontend/
-│   ├── Home.py
+│   ├── Dashboard.py
 │   └── pages/
 │       └── 2_Skills.py
 │
 ├── requirements.txt
 ├── .gitignore
+├── jobs.db
 └── README.md
 ```
 
 ### ⚙️ Installation
 1. Clone the repository : 
 git clone https://github.com/YOUR_USERNAME/job-matcher.git
+
 cd job-matcher
 2. Create virtual environment : 
 python -m venv venv
@@ -102,7 +107,9 @@ pip install -r requirements.txt
 
 ▶️ Running the App
 1. Start the FastAPI backend
+   
 cd backend
+
 uvicorn app.main:app --reload
 
 Backend runs at:
@@ -118,6 +125,7 @@ http://127.0.0.1:8000/docs
 In a second terminal:
 
 cd frontend
+
 streamlit run Home.py
 
 Frontend runs at:
@@ -138,20 +146,22 @@ Step 3: Filter by match score
 Use the slider to filter jobs by minimum match score.
 
 Step 4: Apply & Track
+
 Open job posting using the Open Job button
+
 Click Mark Applied to update the job status in the database
 
 ### 📌 Planned Improvements
-Add more Korean job-posting website scraper
-Better NLP-based skill extraction
-Job specialty based scrapping
-Auto-discover new skills from job descriptions
+- Add more Korean job-posting website scraper
+- Better NLP-based skill extraction
+- Job specialty based scrapping
+- Auto-discover new skills from job descriptions
 
 ### ⚠️ Disclaimer
 
 This project is for educational and personal use only.
 Some job websites may block scraping depending on rate limits or bot detection.
 
-### 👤 Author
+## 👤 Author
 
 Built by Patrick Bastard
