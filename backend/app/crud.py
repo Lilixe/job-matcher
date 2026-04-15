@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+
+from .scraper.scoring import compute_score
 from .models import JobApplication
 from .models import UserSkills
 from .schemas import JobCreate
@@ -145,6 +147,44 @@ def update_job_status(db: Session, job_id: int, new_status: str):
     db.refresh(job)
     return job
 
+def recalculate_all_jobs(db: Session):
+    """
+    Recalculate match scores and statuses for all job applications.
+
+    Retrieves the current user skills from the database, then iterates through all job
+    applications to recompute their match scores based on the intersection of job skills
+    and user skills. Updates the score and status ("fit" if score >= 50, "unfit" otherwise)
+    for each job. Jobs with no skills are assigned a score of 0.0 and status "unfit".
+
+    Args:
+        db (Session): Database session dependency.
+
+    Returns:
+        None: Modifies job records in place and commits changes to the database.
+
+    Example:
+        >>> recalculate_all_jobs(db)
+        # All job scores and statuses are updated based on current user skills.
+    """
+    skills_db = get_skills(db)
+    user_skills = [s.skill.lower() for s in skills_db]
+
+    jobs = db.query(JobApplication).all()
+
+    for job in jobs:
+        if not job.skills: # type: ignore
+            job.score = 0.0 # type: ignore
+            job.status = "unfit" # type: ignore
+            continue
+
+        job_skills = [s.strip().lower() for s in job.skills.split(",") if s.strip()]
+        score = compute_score(job_skills, user_skills)
+
+        job.score = score # type: ignore
+        job.status = "fit" if score >= 50 else "unfit" # type: ignore
+
+    db.commit()
+
 # SKILLS
 
 def add_skill(db: Session, skill: str):
@@ -177,6 +217,7 @@ def add_skill(db: Session, skill: str):
     db.add(new_skill)
     db.commit()
     db.refresh(new_skill)
+    recalculate_all_jobs(db) 
     return new_skill
 
 def add_skills_bulk(db: Session, skills: list[str]) -> int:
@@ -210,6 +251,7 @@ def add_skills_bulk(db: Session, skills: list[str]) -> int:
             inserted += 1
 
     db.commit()
+    recalculate_all_jobs(db) 
     return inserted
 
 def get_skills(db: Session): # type: ignore
