@@ -1,17 +1,11 @@
 import streamlit as st
 import requests
 
-API_URL = "https://job-matcher-27sz.onrender.com"
+from config import API_URL
 
 st.title("My Skills")
 
 # --- Load Skills ---
-"""
-Load and display current user skills from the backend API.
-
-Fetches all skills from the database and displays them as styled tags
-in a responsive grid layout. Shows a warning if no skills are found.
-"""
 skills_res = requests.get(f"{API_URL}/skills")
 skills = skills_res.json()
 
@@ -41,12 +35,6 @@ else:
             )
 
 if st.button("🗑️ Delete ALL skills"):
-    """
-    Delete all user skills from the database.
-    
-    Sends a DELETE request to clear all skills and refreshes the page
-    to reflect changes. Shows success/error feedback.
-    """
     r = requests.delete(f"{API_URL}/skills/clear")
 
     if r.status_code == 200:
@@ -58,12 +46,6 @@ if st.button("🗑️ Delete ALL skills"):
 st.divider()
 
 # --- Add skill manually ---
-"""
-Manual skill addition section.
-
-Provides a text input for entering new skills and validates that
-the input is not empty before submitting to the API.
-"""
 st.subheader("➕ Add a new skill")
 
 new_skill = st.text_input("")
@@ -79,12 +61,6 @@ if st.button("Add Skill"):
 st.divider()
 
 # --- Upload Resume ---
-"""
-Resume upload and skill extraction section.
-
-Allows users to upload a PDF resume and extract skills automatically
-using the backend's NLP processing. Displays extraction results.
-"""
 st.subheader("📄 Upload Resume PDF")
 
 uploaded_file = st.file_uploader("Upload your resume", type=["pdf"])
@@ -92,12 +68,6 @@ uploaded_file = st.file_uploader("Upload your resume", type=["pdf"])
 extract_clicked = st.button("Extract Skills from Resume", disabled=(uploaded_file is None))
 
 if extract_clicked:
-    """
-    Process uploaded resume PDF for skill extraction.
-    
-    Sends the PDF file to the backend API for text extraction and skill parsing,
-    then displays the number of skills found and inserted.
-    """
     response = requests.post(
         f"{API_URL}/skills/from-resume",
         files={"file": uploaded_file} # type: ignore
