@@ -49,6 +49,23 @@
 
 
 def compute_score(job_skills: list[str], user_skills: list[str]) -> float:
+    """
+    Calculate the job match score based on skill overlap.
+    
+    Computes the percentage of job required skills that match with user skills.
+    The score represents what fraction of the job's required skills the user possesses.
+    
+    Args:
+        job_skills (list[str]): List of skills required for the job.
+        user_skills (list[str]): List of skills the user possesses.
+    
+    Returns:
+        float: Match score as a percentage (0.0 - 100.0). Returns 0.0 if job_skills is empty.
+    
+    Example:
+        >>> compute_score(["python", "fastapi", "sql"], ["python", "sql"])
+        66.67
+    """
     job_set = set(job_skills)
     user_set = set(user_skills)
 

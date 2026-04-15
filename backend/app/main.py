@@ -21,14 +21,38 @@ app = FastAPI(title="Job Tracker API")
 
 @app.get("/")
 def root():
+    """
+    Health check endpoint.
+    
+    Returns:
+        dict: Status message indicating the API is running.
+    
+    Example:
+        GET / -> {"message": "API running"}
+    """
     return {"message": "API running"}
-
-#@app.post("/jobs", response_model=JobResponse)
-#def create_job(job: JobCreate, db: Session = Depends(get_db)):
-#    return crud.create_job(db, job)
 
 @app.post("/scrape/wanted")
 def scrape_wanted(limit: int = 30, min_score: float = 50.0, db: Session = Depends(get_db)):
+    """
+    Scrape job listings from Wanted.co.kr and store matching jobs in the database.
+    
+    Fetches job postings, extracts skills from job descriptions, calculates match scores
+    against user skills, and stores jobs with "fit" or "unfit" status based on the minimum score threshold.
+    
+    Args:
+        limit (int, optional): Maximum number of jobs to scrape. Defaults to 30.
+        min_score (float, optional): Minimum match score threshold. Jobs with score >= min_score are marked as "fit". Defaults to 50.0.
+        db (Session): Database session dependency.
+    
+    Returns:
+        dict: Scraping summary with keys:
+            - scraped (int): Total jobs retrieved from Wanted
+            - inserted (int): Jobs successfully stored in database
+    
+    Example:
+        POST /scrape/wanted?limit=20&min_score=60 -> {"scraped": 20, "inserted": 15}
+    """
     jobs = scrape_wanted_jobs(limit=limit)
 
     skills_db = crud.get_skills(db)
@@ -68,10 +92,43 @@ def list_jobs(
     score: float = 0.0,
     db: Session = Depends(get_db)
 ):
+    """
+    Retrieve job listings with optional filtering.
+    
+    Fetches all stored jobs filtered by status, company name, and minimum match score.
+    
+    Args:
+        status (str, optional): Filter by job status ("fit", "unfit", "applied", etc.). Defaults to None (no filter).
+        company (str, optional): Filter by company name (case-insensitive substring match). Defaults to None.
+        score (float, optional): Minimum match score threshold. Defaults to 0.0.
+        db (Session): Database session dependency.
+    
+    Returns:
+        list[JobResponse]: List of job objects matching the criteria.
+    
+    Example:
+        GET /jobs?status=fit&score=60 -> [{"id": 1, "title": "...", "score": 75.0, ...}, ...]
+    """
     return crud.get_jobs(db, status=status, company=company, score=score) # type: ignore
 
 @app.get("/jobs/{job_id}", response_model=JobResponse)
 def get_job(job_id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve detailed information for a specific job.
+    
+    Args:
+        job_id (int): Unique identifier of the job.
+        db (Session): Database session dependency.
+    
+    Returns:
+        JobResponse: Detailed job object.
+    
+    Raises:
+        HTTPException: 404 if job not found.
+    
+    Example:
+        GET /jobs/123 -> {"id": 123, "title": "...", "company": "...", ...}
+    """
     job = crud.get_job(db, job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -79,6 +136,22 @@ def get_job(job_id: int, db: Session = Depends(get_db)):
 
 @app.delete("/jobs/{job_id}", response_model=JobResponse)
 def delete_job(job_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a job listing from the database.
+    
+    Args:
+        job_id (int): Unique identifier of the job to delete.
+        db (Session): Database session dependency.
+    
+    Returns:
+        JobResponse: The deleted job object.
+    
+    Raises:
+        HTTPException: 404 if job not found.
+    
+    Example:
+        DELETE /jobs/123 -> {"id": 123, "title": "...", ...}
+    """
     job = crud.delete_job(db, job_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -86,6 +159,25 @@ def delete_job(job_id: int, db: Session = Depends(get_db)):
 
 @app.patch("/jobs/{job_id}", response_model=JobResponse)
 def update_status(job_id: int, data: JobUpdateStatus, db: Session = Depends(get_db)):
+    """
+    Update the status of a job listing.
+    
+    Changes the job status (e.g., "fit" to "applied", "unfit" to "fit").
+    
+    Args:
+        job_id (int): Unique identifier of the job.
+        data (JobUpdateStatus): Request body containing the new status.
+        db (Session): Database session dependency.
+    
+    Returns:
+        JobResponse: Updated job object.
+    
+    Raises:
+        HTTPException: 404 if job not found.
+    
+    Example:
+        PATCH /jobs/123 with {"status": "applied"} -> {"id": 123, "status": "applied", ...}
+    """
     job = crud.update_job_status(db, job_id, data.status)
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -96,11 +188,44 @@ def update_status(job_id: int, data: JobUpdateStatus, db: Session = Depends(get_
 
 @app.get("/skills", response_model=list[SkillResponse])
 def list_skills(db: Session = Depends(get_db)):
-    return crud.get_skills(db) # type: ignore
+    """
+    Retrieve all user skills from the database.
+    
+    Args:
+        db (Session): Database session dependency.
+    
+    Returns:
+        list[SkillResponse]: List of all stored user skills.
+    
+    Example:
+        GET /skills -> [{"id": 1, "skill": "python"}, {"id": 2, "skill": "fastapi"}, ...]
+    """
+    return crud.get_skills(db)
 
 @app.post("/skills/from-resume")
 async def skills_from_resume(file: UploadFile = File(...), db: Session = Depends(get_db)):
-
+    """
+    Extract and save skills from an uploaded PDF resume.
+    
+    Parses the PDF file, extracts skills using NLP, and adds new skills to the database.
+    
+    Args:
+        file (UploadFile): PDF file uploaded by the user.
+        db (Session): Database session dependency.
+    
+    Returns:
+        dict: Upload summary with keys:
+            - found (int): Total skills extracted from resume
+            - inserted (int): New skills added to database
+            - skills (list[str]): List of extracted skills
+    
+    Raises:
+        HTTPException: 400 if file is not a PDF.
+    
+    Example:
+        POST /skills/from-resume (multipart/form-data with resume.pdf) -> 
+        {"found": 12, "inserted": 8, "skills": ["python", "fastapi", ...]}
+    """
     if not file.filename.endswith(".pdf"): # type: ignore
         raise HTTPException(status_code=400, detail="Only PDF files are supported")
     
@@ -119,15 +244,58 @@ async def skills_from_resume(file: UploadFile = File(...), db: Session = Depends
 
 @app.post("/skills")
 def add_skill(payload : UserSkill, db: Session = Depends(get_db)): # type: ignore
+    """
+    Add a single skill to the user's skill set.
+    
+    Args:
+        payload (UserSkill): Request body containing the skill name.
+        db (Session): Database session dependency.
+    
+    Returns:
+        SkillResponse: Created skill object.
+    
+    Example:
+        POST /skills with {"skill": "kubernetes"} -> {"id": 10, "skill": "kubernetes"}
+    """
     return crud.add_skill(db, payload.skill)
 
 @app.delete("/skills/clear")
 def delete_all_skill(db: Session = Depends(get_db)):
+    """
+    Delete all user skills from the database.
+    
+    WARNING: This operation is irreversible and removes all stored skills.
+    
+    Args:
+        db (Session): Database session dependency.
+    
+    Returns:
+        dict: Confirmation message.
+    
+    Example:
+        DELETE /skills/clear -> {"message": "All skills deleted"}
+    """
     crud.delete_all_skills(db)
     return {"message": "All skills deleted"}
 
 @app.delete("/skills/{skill_id}", response_model=SkillResponse)
 def delete_skill(skill_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a specific skill from the user's skill set.
+    
+    Args:
+        skill_id (int): Unique identifier of the skill to delete.
+        db (Session): Database session dependency.
+    
+    Returns:
+        SkillResponse: The deleted skill object.
+    
+    Raises:
+        HTTPException: 404 if skill not found.
+    
+    Example:
+        DELETE /skills/5 -> {"id": 5, "skill": "deprecated_tool"}
+    """
     skill = crud.delete_skill(db, skill_id)
     if skill is None:
         raise HTTPException(status_code=404, detail="Skill not found")

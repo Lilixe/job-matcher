@@ -4,7 +4,30 @@ from .skill_extract import flatten_text
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
-def scrape_wanted_jobs(limit: int = 20) -> list[dict]:
+def scrape_wanted_jobs(limit: int = 30) -> list[dict]:
+    """
+    Scrape job listings from Wanted.co.kr for software development positions.
+    
+    Fetches recent job postings filtered by the software development category (tag 518).
+    
+    Args:
+        limit (int, optional): Maximum number of job listings to retrieve. Defaults to 30.
+    
+    Returns:
+        list[dict]: List of job dictionaries with keys:
+            - id (int): Unique job identifier on Wanted
+            - title (str): Job position title
+            - company (str): Company name
+            - url (str): Direct link to the job posting
+    
+    Raises:
+        requests.HTTPError: If the API request fails.
+        requests.Timeout: If the request exceeds 10 seconds.
+    
+    Example:
+        >>> jobs = scrape_wanted_jobs(limit=5)
+        >>> print(jobs[0]['title'])
+    """
     url = "https://www.wanted.co.kr/api/v4/jobs"
 
     params = {
@@ -39,6 +62,28 @@ def scrape_wanted_jobs(limit: int = 20) -> list[dict]:
 
 
 def fetch_wanted_details(job_id: int) -> tuple[str, list[str]]:
+    """
+    Fetch detailed information and skills for a specific job posting.
+    
+    Retrieves the full job description and extracts skill tags from a Wanted job listing.
+    
+    Args:
+        job_id (int): The unique identifier of the job on Wanted.co.kr.
+    
+    Returns:
+        tuple[str, list[str]]: A tuple containing:
+            - description (str): Flattened job description text
+            - skill_tags (list[str]): List of required skills in lowercase
+    
+    Raises:
+        requests.HTTPError: If the API request fails.
+        requests.Timeout: If the request exceeds 10 seconds.
+    
+    Example:
+        >>> description, skills = fetch_wanted_details(123456)
+        >>> print(skills)
+        ['python', 'fastapi', 'sql']
+    """
     url = f"https://www.wanted.co.kr/api/v4/jobs/{job_id}"
 
     headers = {

@@ -12,6 +12,18 @@ st.title("Job Match Dashboard")
 min_score = st.sidebar.slider("Minimum match score (%)", 0, 100, 50)
 
 if st.sidebar.button("Scrape Wanted Jobs"):
+    """
+    Trigger job scraping from Wanted.co.kr.
+    
+    Sends a POST request to the backend API to scrape and store job listings
+    that match the user's skills above the minimum score threshold.
+    
+    Parameters:
+        limit (int): Number of jobs to scrape (hardcoded to 30)
+        min_score (float): Minimum match score for storing jobs
+    
+    Displays success/error messages in the sidebar based on API response.
+    """
     r = requests.post(
         f"{API_URL}/scrape/wanted",
         params={"limit": 30, "min_score": min_score}
@@ -24,6 +36,12 @@ if st.sidebar.button("Scrape Wanted Jobs"):
 
 
 # Fetch jobs
+"""
+Fetch filtered job listings from the backend API.
+
+Retrieves jobs that meet the minimum score criteria and displays them
+in a table format. If no jobs are found, shows a warning message.
+"""
 r = requests.get(f"{API_URL}/jobs", params={"score": min_score})
 
 if r.status_code != 200:
@@ -46,6 +64,14 @@ st.dataframe(df, use_container_width=True)
 st.subheader("Apply / Track Jobs")
 
 for job in jobs:
+    """
+    Display individual job cards with action buttons.
+    
+    For each job, creates a row with company/title info, skills, score,
+    and buttons to open the job link or mark as applied.
+    
+    Layout uses Streamlit columns for responsive design.
+    """
     col1, col2, col3, col4 = st.columns([3, 3, 2, 2])
 
     with col1:
@@ -62,6 +88,12 @@ for job in jobs:
         st.link_button("Open Job", job["url"])
 
         if st.button(f"Mark Applied #{job['id']}", key=f"apply_{job['id']}"):
+            """
+            Update job status to "applied".
+            
+            Sends a PATCH request to mark the job as applied and shows
+            success/error feedback to the user.
+            """
             patch = requests.patch(
                 f"{API_URL}/jobs/{job['id']}",
                 json={"status": "applied"}
