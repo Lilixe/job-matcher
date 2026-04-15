@@ -48,26 +48,45 @@
 # }
 
 
-def compute_score(job_skills: list[str], user_skills: list[str]) -> float:
-    """
-    Calculate the job match score based on skill overlap.
-    
-    Computes the percentage of job required skills that match with user skills.
-    The score represents what fraction of the job's required skills the user possesses.
-    
+def normalize_skills(skills):
+    """Normalize a job or user skill list for comparison.
+
     Args:
-        job_skills (list[str]): List of skills required for the job.
-        user_skills (list[str]): List of skills the user possesses.
-    
+        skills (str | Iterable[str] | None): A comma-separated string or an iterable
+            of skill names.
+
     Returns:
-        float: Match score as a percentage (0.0 - 100.0). Returns 0.0 if job_skills is empty.
-    
-    Example:
-        >>> compute_score(["python", "fastapi", "sql"], ["python", "sql"])
-        66.67
+        list[str]: A normalized list of skills in lowercase with whitespace stripped.
+            If no skills are provided, returns an empty list.
     """
-    job_set = set(job_skills)
-    user_set = set(user_skills)
+    if not skills:
+        return []
+
+    if isinstance(skills, str):
+        return [s.strip().lower() for s in skills.split(",") if s.strip()]
+
+    return [s.strip().lower() for s in skills]
+
+
+def compute_score(job_skills, user_skills) -> float:
+    """Compute a match score between job skills and user skills.
+
+    The score is the percentage of job skills that are found in the user skills.
+    Both inputs are normalized before comparison.
+
+    Args:
+        job_skills (str | Iterable[str] | None): The required skills for the job.
+        user_skills (str | Iterable[str] | None): The user's skills.
+
+    Returns:
+        float: The percentage of job skills matched by the user skills, rounded
+            to two decimals. Returns 0.0 if the job skill list is empty.
+    """
+    job_list = normalize_skills(job_skills)
+    user_list = normalize_skills(user_skills)
+
+    job_set = set(job_list)
+    user_set = set(user_list)
 
     if not job_set:
         return 0.0
