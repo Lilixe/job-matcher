@@ -10,6 +10,32 @@ st.set_page_config(page_title="Job Match Dashboard", layout="wide")
 st.title("Job Match Dashboard")
 headers = {"X-Scrape-Secret": st.secrets["SCRAPE_SECRET"]}
 
+ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
+
+if "is_admin" not in st.session_state:
+    st.session_state.is_admin = False
+
+st.sidebar.subheader("Admin Login")
+
+if not st.session_state.is_admin:
+    password = st.sidebar.text_input("Password", type="password")
+
+    if st.sidebar.button("Login"):
+        if password == ADMIN_PASSWORD:
+            st.session_state.is_admin = True
+            st.sidebar.success("Logged in")
+            st.rerun()
+        else:
+            st.sidebar.error("Wrong password")
+
+else:
+    st.sidebar.success("Admin mode enabled")
+    if st.sidebar.button("Logout"):
+        st.session_state.is_admin = False
+        st.rerun()
+
+can_edit = st.session_state.is_admin
+
 if "min_score" not in st.session_state:
     st.session_state.min_score = MIN_SCORE
 
