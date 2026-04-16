@@ -1,4 +1,6 @@
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
+from streamlit import status
 
 from .scraper.scoring import compute_score
 from .models import JobApplication
@@ -67,11 +69,14 @@ def get_jobs(db: Session, status: str = None, company: str = None, score: float 
         >>> print(len(jobs))
     """
     query = db.query(JobApplication)
-    query = query.filter(JobApplication.score >= score)
+    score_filter = JobApplication.score >= score
+    status_filter = JobApplication.status == status if status else None
 
-    if status:
-        query = query.filter(JobApplication.status == status)
-
+    if status_filter is not None:
+        query = query.filter(or_(score_filter, status_filter))
+    else:
+        query = query.filter(score_filter)
+        
     if company:
         query = query.filter(JobApplication.company.ilike(f"%{company}%"))
 

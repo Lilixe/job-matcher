@@ -56,7 +56,7 @@ else:
     st.sidebar.button("Scrape Wanted Jobs", disabled=True, help="Admin only")
 
 # ── Fetch jobs ────────────────────────────────────────────────────────────────
-r = requests.get(f"{API_URL}/jobs", params={"score": min_score})
+r = requests.get(f"{API_URL}/jobs", params={"score": min_score, "status": "applied"})
 if r.status_code != 200:
     st.error("Could not fetch jobs from API.")
     st.stop()
