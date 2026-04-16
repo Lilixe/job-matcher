@@ -278,6 +278,7 @@ def delete_all_skill(db: Session = Depends(get_db)):
         DELETE /skills/clear -> {"message": "All skills deleted"}
     """
     crud.delete_all_skills(db)
+    crud.recalculate_all_jobs(db) 
     return {"message": "All skills deleted"}
 
 @app.delete("/skills/{skill_id}", response_model=SkillResponse)
@@ -301,6 +302,7 @@ def delete_skill(skill_id: int, db: Session = Depends(get_db)):
     skill = crud.delete_skill(db, skill_id)
     if skill is None:
         raise HTTPException(status_code=404, detail="Skill not found")
+    crud.recalculate_all_jobs(db)
     return skill
 
 

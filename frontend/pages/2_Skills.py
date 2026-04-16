@@ -18,21 +18,27 @@ else:
     cols = st.columns(4)
     for i, skill in enumerate(skills):
         with cols[i % 4]:
-            st.markdown(
-                f"""
-                <div style="
-                    padding: 8px;
-                    background-color: #222;
-                    border-radius: 10px;
-                    text-align: center;
-                    margin-bottom: 8px;
-                    font-size: 14px;
-                ">
-                    {skill['skill']}
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            c1, c2 = st.columns([4, 1])
+            with c1:
+                st.markdown(
+                    f"""
+                    <div style="
+                        padding: 8px;
+                        background-color: #222;
+                        border-radius: 10px;
+                        text-align: center;
+                        margin-bottom: 8px;
+                        font-size: 14px;
+                    ">
+                        {skill['skill']}
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+            with c2:
+                if st.button("❌", key=f"del_{skill['id']}"):
+                    requests.delete(f"{API_URL}/skills/{skill['id']}")
+                    st.rerun()
 
 if st.button("🗑️ Delete ALL skills"):
     r = requests.delete(f"{API_URL}/skills/clear")
