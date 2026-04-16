@@ -13,5 +13,5 @@ jobs:
     steps:
       - name: Call backend scraping endpoint
         run: |
-          curl -X POST "${{ secrets.API_URL }}/scrape/wanted?limit=200&min_score=50" \
+          curl -X POST "${{ secrets.API_URL }}/scrape/wanted?limit=200&min_score=90" \
           -H "X-Scrape-Secret: ${{ secrets.SCRAPE_SECRET }}"
