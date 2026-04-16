@@ -107,28 +107,29 @@ if st.button("💾 Apply Changes"):
 st.subheader("Apply / Track Jobs")
 
 for job in jobs:
-    col1, col2, col3, col4 = st.columns([3, 3, 2, 2])
+    if job["status"] != "applied":
+        col1, col2, col3, col4 = st.columns([3, 3, 2, 2])
 
-    with col1:
-        st.write(f"**{job['company']}**")
-        st.write(job["title"])
+        with col1:
+            st.write(f"**{job['company']}**")
+            st.write(job["title"])
 
-    with col2:
-        st.write(job["skills"])
+        with col2:
+            st.write(job["skills"])
 
-    with col3:
-        st.write(f"Score: {job['score']:.1f}%")
+        with col3:
+            st.write(f"Score: {job['score']:.1f}%")
 
-    with col4:
-        st.link_button("Open Job", job["url"])
+        with col4:
+            st.link_button("Open Job", job["url"])
 
-        if st.button(f"Mark Applied #{job['id']}", key=f"apply_{job['id']}"):
-            patch = requests.patch(
-                f"{API_URL}/jobs/{job['id']}",
-                json={"status": "applied"}
-            )
+            if st.button(f"Mark Applied #{job['id']}", key=f"apply_{job['id']}"):
+                patch = requests.patch(
+                    f"{API_URL}/jobs/{job['id']}",
+                    json={"status": "applied"}
+                )
 
-            if patch.status_code == 200:
-                st.success(f"Marked {job['id']} as applied")
-            else:
-                st.error("Failed to update job status")
+                if patch.status_code == 200:
+                    st.success(f"Marked {job['id']} as applied")
+                else:
+                    st.error("Failed to update job status")
