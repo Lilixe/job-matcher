@@ -4,7 +4,7 @@ from .skill_extract import flatten_text
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
 
-def scrape_wanted_jobs(limit: int = 30) -> list[dict]:
+def scrape_wanted_jobs(limit: int = 100) -> list[dict]:
     """
     Scrape job listings from Wanted.co.kr for software development positions.
     
@@ -29,34 +29,45 @@ def scrape_wanted_jobs(limit: int = 30) -> list[dict]:
         >>> print(jobs[0]['title'])
     """
     url = "https://www.wanted.co.kr/api/v4/jobs"
-
-    params = {
-        "country": "kr",
-        "job_sort": "job.latest_order",
-        "limit": limit,
-        "offset": 0,
-        "job_category_tag": "518"
-    }
-
-    r = requests.get(url, headers=HEADERS, params=params, timeout=10)
-    r.raise_for_status()
-
-    data = r.json()
-
     jobs = []
-    for job in data.get("data", []):
-        category_tags = job.get("category_tags", [])
-        if not any(t.get("parent_id") == 518 for t in category_tags):
-            continue
+    offset = 0
+    page_limit = 50 
+    
+    while len(jobs) < limit:
+        params = {
+            "country": "kr",
+            "job_sort": "job.latest_order",
+            "limit": page_limit,
+            "offset": offset,
+            "job_category_tag": "518"
+        }
 
-        job_id = job.get("id")
+        r = requests.get(url, headers=HEADERS, params=params, timeout=10)
+        r.raise_for_status()
+        data = r.json()
 
-        jobs.append({
-            "id": job_id,
-            "title": job.get("position", "Unknown"),
-            "company": job.get("company", {}).get("name", "Unknown"),
-            "url": f"https://www.wanted.co.kr/wd/{job_id}"
-        })
+        page_jobs = data.get("data", [])
+        if not page_jobs:
+            break
+
+        for job in page_jobs:
+            category_tags = job.get("category_tags", [])
+            if not any(t.get("parent_id") == 518 for t in category_tags):
+                continue
+
+            job_id = job.get("id")
+
+            jobs.append({
+                "id": job_id,
+                "title": job.get("position", "Unknown"),
+                "company": job.get("company", {}).get("name", "Unknown"),
+                "url": f"https://www.wanted.co.kr/wd/{job_id}"
+            })
+
+            if len(jobs) >= limit:
+                break
+
+        offset += page_limit
 
     return jobs
 

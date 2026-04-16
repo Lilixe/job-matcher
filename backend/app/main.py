@@ -1,4 +1,5 @@
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
+import os
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Header
 from sqlalchemy.orm import Session
 
 from .database import Base, engine
@@ -33,7 +34,7 @@ def root():
     return {"message": "API running"}
 
 @app.post("/scrape/wanted")
-def scrape_wanted(limit: int = 30, min_score: float = 50.0, db: Session = Depends(get_db)):
+def scrape_wanted(limit: int = 100, min_score: float = 50.0, db: Session = Depends(get_db), x_scrape_secret: str = Header(None)):
     """
     Scrape job listings from Wanted.co.kr and store matching jobs in the database.
     
@@ -44,6 +45,7 @@ def scrape_wanted(limit: int = 30, min_score: float = 50.0, db: Session = Depend
         limit (int, optional): Maximum number of jobs to scrape. Defaults to 30.
         min_score (float, optional): Minimum match score threshold. Jobs with score >= min_score are marked as "fit". Defaults to 50.0.
         db (Session): Database session dependency.
+        x_scrape_secret (str, optional): Secret header for scraping authorization.
     
     Returns:
         dict: Scraping summary with keys:
@@ -53,6 +55,10 @@ def scrape_wanted(limit: int = 30, min_score: float = 50.0, db: Session = Depend
     Example:
         POST /scrape/wanted?limit=20&min_score=60 -> {"scraped": 20, "inserted": 15}
     """
+    secret = os.getenv("SCRAPE_SECRET")
+    if not secret or x_scrape_secret != secret:
+        raise HTTPException(status_code=403, detail="Forbidden")   
+    
     jobs = scrape_wanted_jobs(limit=limit)
 
     skills_db = crud.get_skills(db)
@@ -80,10 +86,11 @@ def scrape_wanted(limit: int = 30, min_score: float = 50.0, db: Session = Depend
             status=status
         )
 
-        crud.create_job(db, offer)
-        inserted += 1
+        _, created = crud.create_job(db, offer)
+        if created:
+            inserted += 1
 
-    return {"scraped": len(jobs), "inserted": inserted}
+    return {"scraped": len(jobs), "inserted": inserted, "min_score": min_score}
 
 @app.get("/jobs", response_model=list[JobResponse])
 def list_jobs(
@@ -293,7 +300,6 @@ def delete_skill(skill_id: int, db: Session = Depends(get_db), min_score: float 
         skill_id (int): Unique identifier of the skill to delete.
         db (Session): Database session dependency.
         min_score (float): Minimum score threshold for job matching.
-    
     Returns:
         SkillResponse: The deleted skill object.
     

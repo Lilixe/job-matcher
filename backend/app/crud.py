@@ -30,7 +30,7 @@ def create_job(db: Session, job: JobCreate):
     """
     existing = db.query(JobApplication).filter(JobApplication.url == job.url).first() # type: ignore
     if existing:
-        return existing
+        return existing, False
     
     new_job = JobApplication(
         title=job.title,
@@ -44,7 +44,7 @@ def create_job(db: Session, job: JobCreate):
     db.add(new_job)
     db.commit()
     db.refresh(new_job)
-    return new_job
+    return new_job, True
 
 def get_jobs(db: Session, status: str = None, company: str = None, score: float = 0.0): # type: ignore
     """
