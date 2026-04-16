@@ -7,10 +7,9 @@ import pandas as pd
 from config import API_URL, MIN_SCORE
 
 st.set_page_config(page_title="Job Match Dashboard", layout="wide")
-
 st.title("Job Match Dashboard")
-
 headers = {"X-Scrape-Secret": st.secrets["SCRAPE_SECRET"]}
+
 if "min_score" not in st.session_state:
     st.session_state.min_score = MIN_SCORE
 
