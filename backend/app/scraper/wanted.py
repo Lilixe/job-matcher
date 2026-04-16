@@ -3,7 +3,6 @@ from .skill_extract import flatten_text
 
 HEADERS = {"User-Agent": "Mozilla/5.0"}
 
-
 def scrape_wanted_jobs(limit: int = 100) -> list[dict]:
     """
     Scrape job listings from Wanted.co.kr for software development positions.

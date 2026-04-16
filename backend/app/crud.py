@@ -9,7 +9,7 @@ from .schemas import JobCreate
 from .schemas import UserSkill
 
 
-#JOBS
+# ── Jobs ─────────────────────────────────────────────────────────────────────
 
 def create_job(db: Session, job: JobCreate):
     """
@@ -191,7 +191,7 @@ def recalculate_all_jobs(db: Session, score_threshold: float):
 
     db.commit()
 
-# SKILLS
+# ── Skills ─────────────────────────────────────────────────────────────────────
 
 def add_skill(db: Session, skill: str):
     """

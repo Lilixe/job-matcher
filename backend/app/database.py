@@ -11,7 +11,6 @@ if not DATABASE_URL:
     # fallback for local development
     DATABASE_URL = "sqlite:///./jobs.db"
 
-# SQLite requires this special connect_args
 connect_args = {}
 if DATABASE_URL.startswith("sqlite"):
     connect_args = {"check_same_thread": False}

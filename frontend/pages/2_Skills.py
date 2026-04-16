@@ -13,7 +13,7 @@ if not is_admin:
 min_score = st.session_state.get("min_score", 50)
 st.write("Current minimum score:", min_score)
 
-# --- Load Skills ---
+# ── Load Skills ─────────────────────────────────────────────────────────────────────
 skills_res = requests.get(f"{API_URL}/skills")
 skills = skills_res.json()
 
@@ -63,7 +63,7 @@ else:
 
 st.divider()
 
-# --- Add skill manually ---
+# ── Add Skill Manually ─────────────────────────────────────────────────────────────────────
 st.subheader("➕ Add a new skill")
 
 new_skill = st.text_input("")
@@ -81,12 +81,11 @@ else:
 
 st.divider()
 
-# --- Upload Resume ---
+# ── Upload Resume ─────────────────────────────────────────────────────────────────────
 st.subheader("📄 Upload Resume PDF")
 
 uploaded_file = st.file_uploader("Upload your resume", type=["pdf"])
 
-# Disable extract button for guests even if a file is uploaded
 extract_clicked = st.button(
     "Extract Skills from Resume",
     disabled=(uploaded_file is None or not is_admin),

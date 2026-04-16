@@ -18,8 +18,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Job Tracker API")
 
-###### JOBS API ######
-
+# ── Jobs API ─────────────────────────────────────────────────────────────────────
 @app.get("/")
 def root():
     """
@@ -191,8 +190,7 @@ def update_status(job_id: int, data: JobUpdateStatus, db: Session = Depends(get_
     return job
 
 
-###### SKILLS API ######
-
+# ── Skills API ─────────────────────────────────────────────────────────────────────
 @app.get("/skills", response_model=list[SkillResponse])
 def list_skills(db: Session = Depends(get_db)):
     """

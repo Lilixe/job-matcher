@@ -3,7 +3,7 @@ import streamlit as st
 import requests
 import pandas as pd
 from config import API_URL, MIN_SCORE
-from auth import require_auth  # ← import the shared helper
+from auth import require_auth
 
 st.set_page_config(page_title="Job Match Dashboard", layout="wide")
 st.title("Job Match Dashboard")
@@ -11,10 +11,10 @@ st.title("Job Match Dashboard")
 headers = {"X-Scrape-Secret": st.secrets["SCRAPE_SECRET"]}
 
 # ── Admin login ───────────────────────────────────────────────────────────────
-is_admin = require_auth()  # ← replaces the entire inline login block
+is_admin = require_auth()
 
 if not is_admin:
-    st.info("🔒 You are in read-only mode. Log in as admin to scrape, edit, or apply to jobs.")
+    st.info("You are in read-only mode. Log in as admin to scrape, edit, or apply to jobs.")
 
 # ── Session state ─────────────────────────────────────────────────────────────
 if "min_score" not in st.session_state:
@@ -84,7 +84,7 @@ edited_df = st.data_editor(
 )
 
 if is_admin:
-    if st.button("💾 Apply Changes"):
+    if st.button("Apply Changes"):
         updates = 0
         deletes = 0
         for i in range(len(df)):
