@@ -1,3 +1,5 @@
+from wsgiref import headers
+
 import streamlit as st
 import requests
 import pandas as pd
@@ -8,6 +10,7 @@ st.set_page_config(page_title="Job Match Dashboard", layout="wide")
 
 st.title("Job Match Dashboard")
 
+headers = {"X-Scrape-Secret": st.secrets["SCRAPE_SECRET"]}
 if "min_score" not in st.session_state:
     st.session_state.min_score = MIN_SCORE
 
@@ -18,7 +21,8 @@ st.session_state.min_score = min_score
 if st.sidebar.button("Scrape Wanted Jobs"):
     r = requests.post(
         f"{API_URL}/scrape/wanted",
-        params={"limit": 30, "min_score": min_score}
+        params={"limit": 30, "min_score": min_score},
+        headers=headers
     )
 
     if r.status_code == 200:
