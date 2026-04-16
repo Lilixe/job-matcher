@@ -43,6 +43,7 @@ st.subheader(f"Recommended Jobs (score >= {min_score}%)")
 df_display = df.copy()
 
 df_display["status"] = df_display["status"].astype("category")
+df_display["delete"] = False
 
 edited_df = st.data_editor(
     df_display,
@@ -70,8 +71,6 @@ for i in range(len(df)):
         )
         st.success(f"Updated job {job_id} → {new_status}")
         st.rerun()
-
-df_display["delete"] = False
 
 to_delete = edited_df[edited_df["delete"] == True]
 
