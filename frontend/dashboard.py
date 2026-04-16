@@ -3,41 +3,24 @@ import streamlit as st
 import requests
 import pandas as pd
 from config import API_URL, MIN_SCORE
+from auth import require_auth  # ← import the shared helper
 
 st.set_page_config(page_title="Job Match Dashboard", layout="wide")
 st.title("Job Match Dashboard")
 
 headers = {"X-Scrape-Secret": st.secrets["SCRAPE_SECRET"]}
 
-# ── Admin login ──────────────────────────────────────────────────────────────
-if "is_admin" not in st.session_state:
-    st.session_state.is_admin = False
-
-with st.sidebar.expander("🔐 Admin Login", expanded=not st.session_state.is_admin):
-    if not st.session_state.is_admin:
-        admin_pw = st.text_input("Admin password", type="password", key="admin_pw_input")
-        if st.button("Login"):
-            if admin_pw == st.secrets["ADMIN_PASSWORD"]:
-                st.session_state.is_admin = True
-                st.rerun()
-            else:
-                st.sidebar.error("Incorrect password")
-    else:
-        st.sidebar.success("✅ Logged in as admin")
-        if st.button("Logout"):
-            st.session_state.is_admin = False
-            st.rerun()
-
-is_admin = st.session_state.is_admin
+# ── Admin login ───────────────────────────────────────────────────────────────
+is_admin = require_auth()  # ← replaces the entire inline login block
 
 if not is_admin:
     st.info("🔒 You are in read-only mode. Log in as admin to scrape, edit, or apply to jobs.")
 
-# ── Session state ────────────────────────────────────────────────────────────
+# ── Session state ─────────────────────────────────────────────────────────────
 if "min_score" not in st.session_state:
     st.session_state.min_score = MIN_SCORE
 
-# ── Sidebar controls ─────────────────────────────────────────────────────────
+# ── Sidebar controls ──────────────────────────────────────────────────────────
 min_score = st.sidebar.slider("Minimum match score (%)", 0, 100, st.session_state.min_score)
 st.session_state.min_score = min_score
 
@@ -56,7 +39,7 @@ else:
     st.sidebar.button("Scrape Wanted Jobs", disabled=True, help="Admin only")
 
 # ── Fetch jobs ────────────────────────────────────────────────────────────────
-r = requests.get(f"{API_URL}/jobs", params={"score": min_score, "status": "applied"})
+r = requests.get(f"{API_URL}/jobs", params={"score": min_score, "status": "applied"}) 
 if r.status_code != 200:
     st.error("Could not fetch jobs from API.")
     st.stop()
@@ -83,7 +66,6 @@ if search_query.strip():
 df_display = df.copy()
 df_display["delete"] = False
 
-# Columns non-admins can never edit
 always_disabled = ["id", "title", "company", "url", "score", "skills", "source", "created_at"]
 
 edited_df = st.data_editor(
@@ -98,7 +80,6 @@ edited_df = st.data_editor(
         ),
         "delete": st.column_config.CheckboxColumn("Delete?"),
     },
-    # Admins can edit status + delete; guests see everything locked
     disabled=always_disabled if is_admin else always_disabled + ["status", "delete"],
 )
 

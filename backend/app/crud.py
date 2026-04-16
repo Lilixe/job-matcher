@@ -186,7 +186,7 @@ def recalculate_all_jobs(db: Session, score_threshold: float):
         score = compute_score(job_skills, user_skills)
 
         job.score = score # type: ignore
-        job.status = "fit" if score >= score_threshold else "unfit" # type: ignore
+        job.status = "fit" if score >= score_threshold and job.status != "applied" else "unfit" # type: ignore
 
     db.commit()
 
