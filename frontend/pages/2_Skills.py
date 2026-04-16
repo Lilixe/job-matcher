@@ -18,7 +18,7 @@ else:
     cols = st.columns(4)
     for i, skill in enumerate(skills):
         with cols[i % 4]:
-            c1, c2 = st.columns([4, 1])
+            c1, c2 = st.columns([5, 2])
             with c1:
                 st.markdown(
                     f"""
@@ -36,7 +36,7 @@ else:
                     unsafe_allow_html=True
                 )
             with c2:
-                if st.button("❌", key=f"del_{skill['id']}", width="stretch"):
+                if st.button("❌", key=f"del_{skill['id']}", width="content"):
                     requests.delete(f"{API_URL}/skills/{skill['id']}",params={"min_score": min_score})
                     st.rerun()
 

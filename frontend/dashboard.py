@@ -52,7 +52,8 @@ edited_df = st.data_editor(
             "Status",
             options=["fit", "unfit", "applied", "rejected"],
             required=True
-        )
+        ),
+        "delete": st.column_config.CheckboxColumn("Delete?")
     },
     disabled=["id", "title", "company", "url", "score", "skills", "source", "created_at"]
 )
@@ -71,19 +72,6 @@ for i in range(len(df)):
         st.rerun()
 
 df_display["delete"] = False
-
-edited_df = st.data_editor(
-    df_display,
-    use_container_width=True,
-    column_config={
-        "status": st.column_config.SelectboxColumn(
-            "Status",
-            options=["fit", "unfit", "applied", "rejected"]
-        ),
-        "delete": st.column_config.CheckboxColumn("Delete?")
-    },
-    disabled=["id", "title", "company", "url", "score", "skills", "source", "created_at"]
-)
 
 to_delete = edited_df[edited_df["delete"] == True]
 
