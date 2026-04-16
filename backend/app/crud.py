@@ -217,7 +217,6 @@ def add_skill(db: Session, skill: str):
     db.add(new_skill)
     db.commit()
     db.refresh(new_skill)
-    recalculate_all_jobs(db) 
     return new_skill
 
 def add_skills_bulk(db: Session, skills: list[str]) -> int:
@@ -249,9 +248,7 @@ def add_skills_bulk(db: Session, skills: list[str]) -> int:
         if not existing:
             db.add(UserSkills(skill=skill))
             inserted += 1
-
     db.commit()
-    recalculate_all_jobs(db) 
     return inserted
 
 def get_skills(db: Session): # type: ignore

@@ -235,7 +235,7 @@ async def skills_from_resume(file: UploadFile = File(...), db: Session = Depends
     found_skills = extract_skills(text)
 
     inserted = crud.add_skills_bulk(db, found_skills)
-
+    crud.recalculate_all_jobs(db) 
     return {
     "found": len(found_skills),
     "inserted": inserted,
@@ -257,7 +257,9 @@ def add_skill(payload : UserSkill, db: Session = Depends(get_db)): # type: ignor
     Example:
         POST /skills with {"skill": "kubernetes"} -> {"id": 10, "skill": "kubernetes"}
     """
-    return crud.add_skill(db, payload.skill)
+    result = crud.add_skill(db, payload.skill)
+    crud.recalculate_all_jobs(db) 
+    return result
 
 @app.delete("/skills/clear")
 def delete_all_skill(db: Session = Depends(get_db)):
