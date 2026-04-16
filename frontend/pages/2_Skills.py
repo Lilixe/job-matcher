@@ -8,7 +8,7 @@ st.title("My Skills")
 is_admin = require_auth()
 
 if not is_admin:
-    st.info("🔒 Read-only mode. Log in as admin to add, delete, or extract skills.")
+    st.info("Read-only mode. Log in as admin to add, delete, or extract skills.")
 
 min_score = st.session_state.get("min_score", 50)
 st.write("Current minimum score:", min_score)
@@ -51,7 +51,7 @@ else:
                     st.button("❌", key=f"del_{skill['id']}", disabled=True)
 
 if is_admin:
-    if st.button("🗑️ Delete ALL skills"):
+    if st.button("Delete ALL skills"):
         r = requests.delete(f"{API_URL}/skills/clear", params={"min_score": min_score})
         if r.status_code == 200:
             st.success("All skills deleted!")
@@ -64,7 +64,7 @@ else:
 st.divider()
 
 # ── Add Skill Manually ─────────────────────────────────────────────────────────────────────
-st.subheader("➕ Add a new skill")
+st.subheader("Add a new skill")
 
 new_skill = st.text_input("")
 
@@ -82,7 +82,7 @@ else:
 st.divider()
 
 # ── Upload Resume ─────────────────────────────────────────────────────────────────────
-st.subheader("📄 Upload Resume PDF")
+st.subheader("Upload Resume PDF")
 
 uploaded_file = st.file_uploader("Upload your resume", type=["pdf"])
 

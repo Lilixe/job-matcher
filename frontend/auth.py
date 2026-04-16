@@ -5,7 +5,7 @@ def require_auth():
     if "is_admin" not in st.session_state:
         st.session_state.is_admin = False
 
-    with st.sidebar.expander("🔐 Admin Login", expanded=not st.session_state.is_admin):
+    with st.sidebar.expander("Admin Login", expanded=not st.session_state.is_admin):
         if not st.session_state.is_admin:
             admin_pw = st.text_input("Admin password", type="password", key="admin_pw_input")
             if st.button("Login", key="admin_login_btn"):
@@ -15,7 +15,7 @@ def require_auth():
                 else:
                     st.sidebar.error("Incorrect password")
         else:
-            st.sidebar.success("✅ Logged in as admin")
+            st.sidebar.success("Logged in as admin")
             if st.button("Logout", key="admin_logout_btn"):
                 st.session_state.is_admin = False
                 st.rerun()
