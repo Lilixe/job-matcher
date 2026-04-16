@@ -43,19 +43,28 @@ jobs = r.json()
 if not jobs:
     st.warning("No jobs found. Try scraping first.")
     st.stop()
-
 df = pd.DataFrame(jobs)
 
-# Show jobs table
 st.subheader(f"Recommended Jobs (score >= {min_score}%)")
-df_display = df.copy()
 
-df_display["status"] = df_display["status"].astype("category")
+search_query = st.text_input("🔍 Search jobs (title, company, skills)", "")
+
+if search_query.strip():
+    q = search_query.lower()
+
+    df = df[
+        df["title"].str.lower().str.contains(q, na=False)
+        | df["company"].str.lower().str.contains(q, na=False)
+        | df["skills"].str.lower().str.contains(q, na=False)
+    ]
+
+df_display = df.copy()
 df_display["delete"] = False
 
 edited_df = st.data_editor(
     df_display,
     use_container_width=True,
+    hide_index=True,
     column_config={
         "status": st.column_config.SelectboxColumn(
             "Status",
@@ -67,27 +76,34 @@ edited_df = st.data_editor(
     disabled=["id", "title", "company", "url", "score", "skills", "source", "created_at"]
 )
 
-for i in range(len(df)):
-    old_status = df.loc[i, "status"]
-    new_status = edited_df.loc[i, "status"]
+if st.button("💾 Apply Changes"):
+    updates = 0
+    deletes = 0
 
-    if old_status != new_status:
+    for i in range(len(df)):
         job_id = df.loc[i, "id"]
-        requests.patch(
-            f"{API_URL}/jobs/{job_id}",
-            json={"status": new_status}
-        )
-        st.success(f"Updated job {job_id} → {new_status}")
-        st.rerun()
 
-to_delete = edited_df[edited_df["delete"] == True]
+        # Delete job
+        if edited_df.loc[i, "delete"] is True:
+            requests.delete(f"{API_URL}/jobs/{job_id}")
+            deletes += 1
+            continue
 
-if len(to_delete) > 0:
-    if st.button("Confirm Delete Selected Jobs"):
-        for _, row in to_delete.iterrows():
-            requests.delete(f"{API_URL}/jobs/{row['id']}")
-        st.rerun()
+        # Update status
+        old_status = df.loc[i, "status"]
+        new_status = edited_df.loc[i, "status"]
 
+        if old_status != new_status:
+            requests.patch(
+                f"{API_URL}/jobs/{job_id}",
+                json={"status": new_status}
+            )
+            updates += 1
+
+    st.success(f"Updated {updates} jobs, deleted {deletes} jobs.")
+    st.rerun()
+    
+    
 # Show apply buttons
 st.subheader("Apply / Track Jobs")
 
