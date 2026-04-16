@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 
-from config import API_URL
+from config import API_URL, min_score
 
 st.set_page_config(page_title="Job Match Dashboard", layout="wide")
 
@@ -40,7 +40,58 @@ df = pd.DataFrame(jobs)
 
 # Show jobs table
 st.subheader(f"Recommended Jobs (score >= {min_score}%)")
-st.dataframe(df, use_container_width=True)
+df_display = df.copy()
+
+df_display["status"] = df_display["status"].astype("category")
+
+edited_df = st.data_editor(
+    df_display,
+    use_container_width=True,
+    column_config={
+        "status": st.column_config.SelectboxColumn(
+            "Status",
+            options=["fit", "unfit", "applied", "rejected"],
+            required=True
+        )
+    },
+    disabled=["id", "title", "company", "url", "score", "skills", "source", "created_at"]
+)
+
+for i in range(len(df)):
+    old_status = df.loc[i, "status"]
+    new_status = edited_df.loc[i, "status"]
+
+    if old_status != new_status:
+        job_id = df.loc[i, "id"]
+        requests.patch(
+            f"{API_URL}/jobs/{job_id}",
+            json={"status": new_status}
+        )
+        st.success(f"Updated job {job_id} → {new_status}")
+        st.rerun()
+
+df_display["delete"] = False
+
+edited_df = st.data_editor(
+    df_display,
+    use_container_width=True,
+    column_config={
+        "status": st.column_config.SelectboxColumn(
+            "Status",
+            options=["fit", "unfit", "applied", "rejected"]
+        ),
+        "delete": st.column_config.CheckboxColumn("Delete?")
+    },
+    disabled=["id", "title", "company", "url", "score", "skills", "source", "created_at"]
+)
+
+to_delete = edited_df[edited_df["delete"] == True]
+
+if len(to_delete) > 0:
+    if st.button("Confirm Delete Selected Jobs"):
+        for _, row in to_delete.iterrows():
+            requests.delete(f"{API_URL}/jobs/{row['id']}")
+        st.rerun()
 
 # Show apply buttons
 st.subheader("Apply / Track Jobs")

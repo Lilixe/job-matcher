@@ -203,7 +203,7 @@ def list_skills(db: Session = Depends(get_db)):
     return crud.get_skills(db)
 
 @app.post("/skills/from-resume")
-async def skills_from_resume(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def skills_from_resume(file: UploadFile = File(...), db: Session = Depends(get_db), min_score: float = 50.0):
     """
     Extract and save skills from an uploaded PDF resume.
     
@@ -212,6 +212,7 @@ async def skills_from_resume(file: UploadFile = File(...), db: Session = Depends
     Args:
         file (UploadFile): PDF file uploaded by the user.
         db (Session): Database session dependency.
+        min_score (float): Minimum score threshold for job matching.
     
     Returns:
         dict: Upload summary with keys:
@@ -235,7 +236,7 @@ async def skills_from_resume(file: UploadFile = File(...), db: Session = Depends
     found_skills = extract_skills(text)
 
     inserted = crud.add_skills_bulk(db, found_skills)
-    crud.recalculate_all_jobs(db) 
+    crud.recalculate_all_jobs(db, score_threshold=min_score) 
     return {
     "found": len(found_skills),
     "inserted": inserted,
@@ -243,13 +244,14 @@ async def skills_from_resume(file: UploadFile = File(...), db: Session = Depends
     }
 
 @app.post("/skills")
-def add_skill(payload : UserSkill, db: Session = Depends(get_db)): # type: ignore
+def add_skill(payload : UserSkill, db: Session = Depends(get_db), min_score: float = 50.0): # type: ignore
     """
     Add a single skill to the user's skill set.
     
     Args:
         payload (UserSkill): Request body containing the skill name.
         db (Session): Database session dependency.
+        min_score (float): Minimum score threshold for job matching.
     
     Returns:
         SkillResponse: Created skill object.
@@ -258,11 +260,11 @@ def add_skill(payload : UserSkill, db: Session = Depends(get_db)): # type: ignor
         POST /skills with {"skill": "kubernetes"} -> {"id": 10, "skill": "kubernetes"}
     """
     result = crud.add_skill(db, payload.skill)
-    crud.recalculate_all_jobs(db) 
+    crud.recalculate_all_jobs(db, score_threshold=min_score) 
     return result
 
 @app.delete("/skills/clear")
-def delete_all_skill(db: Session = Depends(get_db)):
+def delete_all_skill(db: Session = Depends(get_db), min_score: float = 50.0):
     """
     Delete all user skills from the database.
     
@@ -270,6 +272,7 @@ def delete_all_skill(db: Session = Depends(get_db)):
     
     Args:
         db (Session): Database session dependency.
+        min_score (float): Minimum score threshold for job matching.
     
     Returns:
         dict: Confirmation message.
@@ -278,17 +281,18 @@ def delete_all_skill(db: Session = Depends(get_db)):
         DELETE /skills/clear -> {"message": "All skills deleted"}
     """
     crud.delete_all_skills(db)
-    crud.recalculate_all_jobs(db) 
+    crud.recalculate_all_jobs(db, score_threshold=min_score)
     return {"message": "All skills deleted"}
 
 @app.delete("/skills/{skill_id}", response_model=SkillResponse)
-def delete_skill(skill_id: int, db: Session = Depends(get_db)):
+def delete_skill(skill_id: int, db: Session = Depends(get_db), min_score: float = 50.0):
     """
     Delete a specific skill from the user's skill set.
     
     Args:
         skill_id (int): Unique identifier of the skill to delete.
         db (Session): Database session dependency.
+        min_score (float): Minimum score threshold for job matching.
     
     Returns:
         SkillResponse: The deleted skill object.
@@ -302,7 +306,7 @@ def delete_skill(skill_id: int, db: Session = Depends(get_db)):
     skill = crud.delete_skill(db, skill_id)
     if skill is None:
         raise HTTPException(status_code=404, detail="Skill not found")
-    crud.recalculate_all_jobs(db)
+    crud.recalculate_all_jobs(db, score_threshold=min_score)
     return skill
 
 

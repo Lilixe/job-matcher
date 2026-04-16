@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-from config import API_URL
+from config import API_URL, min_score
 
 st.title("My Skills")
 
@@ -36,12 +36,12 @@ else:
                     unsafe_allow_html=True
                 )
             with c2:
-                if st.button("❌", key=f"del_{skill['id']}"):
-                    requests.delete(f"{API_URL}/skills/{skill['id']}")
+                if st.button("❌", key=f"del_{skill['id']}", width="stretch"):
+                    requests.delete(f"{API_URL}/skills/{skill['id']}",params={"min_score": min_score})
                     st.rerun()
 
 if st.button("🗑️ Delete ALL skills"):
-    r = requests.delete(f"{API_URL}/skills/clear")
+    r = requests.delete(f"{API_URL}/skills/clear", params={"min_score": min_score})
 
     if r.status_code == 200:
         st.success("All skills deleted!")
@@ -60,7 +60,7 @@ if st.button("Add Skill"):
     if new_skill.strip() == "":
         st.error("Skill cannot be empty.")
     else:
-        requests.post(f"{API_URL}/skills",json={"skill": new_skill.lower().strip()})
+        requests.post(f"{API_URL}/skills",json={"skill": new_skill.lower().strip()}, params={"min_score": min_score})
         st.success(f"Added: {new_skill}")
         st.rerun()
 
@@ -76,7 +76,8 @@ extract_clicked = st.button("Extract Skills from Resume", disabled=(uploaded_fil
 if extract_clicked:
     response = requests.post(
         f"{API_URL}/skills/from-resume",
-        files={"file": uploaded_file} # type: ignore
+        files={"file": uploaded_file}, # type: ignore
+        params={"min_score": min_score}
     )
 
     if response.status_code == 200:

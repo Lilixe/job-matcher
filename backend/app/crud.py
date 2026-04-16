@@ -147,7 +147,7 @@ def update_job_status(db: Session, job_id: int, new_status: str):
     db.refresh(job)
     return job
 
-def recalculate_all_jobs(db: Session):
+def recalculate_all_jobs(db: Session, score_threshold: float):
     """
     Recalculate match scores and statuses for all job applications.
 
@@ -181,7 +181,7 @@ def recalculate_all_jobs(db: Session):
         score = compute_score(job_skills, user_skills)
 
         job.score = score # type: ignore
-        job.status = "fit" if score >= 50 else "unfit" # type: ignore
+        job.status = "fit" if score >= score_threshold else "unfit" # type: ignore
 
     db.commit()
 
