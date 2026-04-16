@@ -9,7 +9,7 @@ st.set_page_config(page_title="Job Match Dashboard", layout="wide")
 st.title("Job Match Dashboard")
 
 # Sidebar controls
-min_score = st.sidebar.slider("Minimum match score (%)", 0, 100, 50)
+min_score = st.sidebar.slider("Minimum match score (%)", 0, 100, min_score)
 
 if st.sidebar.button("Scrape Wanted Jobs"):
     r = requests.post(
