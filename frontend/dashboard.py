@@ -83,7 +83,7 @@ if st.button("💾 Apply Changes"):
         job_id = df.loc[i, "id"]
 
         # Delete job
-        if edited_df.loc[i, "delete"] is True:
+        if bool(edited_df.loc[i, "delete"]):
             requests.delete(f"{API_URL}/jobs/{job_id}")
             deletes += 1
             continue
