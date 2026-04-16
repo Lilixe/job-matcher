@@ -1,9 +1,11 @@
 import streamlit as st
 import requests
 
-from config import API_URL, min_score
+from config import API_URL
 
 st.title("My Skills")
+min_score = st.session_state.get("min_score", 50)
+st.write("Current minimum score:", min_score)
 
 # --- Load Skills ---
 skills_res = requests.get(f"{API_URL}/skills")

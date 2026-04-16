@@ -2,14 +2,18 @@ import streamlit as st
 import requests
 import pandas as pd
 
-from config import API_URL, min_score
+from config import API_URL, MIN_SCORE
 
 st.set_page_config(page_title="Job Match Dashboard", layout="wide")
 
 st.title("Job Match Dashboard")
 
+if "min_score" not in st.session_state:
+    st.session_state.min_score = MIN_SCORE
+
 # Sidebar controls
-min_score = st.sidebar.slider("Minimum match score (%)", 0, 100, min_score)
+min_score = st.sidebar.slider("Minimum match score (%)", 0, 100, st.session_state.min_score)
+st.session_state.min_score = min_score
 
 if st.sidebar.button("Scrape Wanted Jobs"):
     r = requests.post(
