@@ -1,0 +1,17 @@
+name: Auto Scrape Wanted
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # 09:00 KST
+    - cron: "0 12 * * *"  # 21:00 KST
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Call backend scraping endpoint
+        run: |
+          curl -X POST "${{ secrets.API_URL }}/scrape/wanted?limit=200&min_score=50" \
+          -H "X-Scrape-Secret: ${{ secrets.SCRAPE_SECRET }}"
