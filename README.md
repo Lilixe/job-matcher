@@ -1,12 +1,12 @@
-# Job Match Dashboard 🚀
+# Job Match Dashboard 
 
 A full-stack job scraping + matching web app that automatically scrapes job postings, extracts required skills, compares them with your personal skills, ranks jobs by match score, and lets you track applications.
 
-Built with **FastAPI + SQLite + Streamlit**.
+Built with **FastAPI + SQLite/PostgreSQL + Streamlit**.
 
 ---
 
-## ✨ Features
+## Features
 
 ### Job Scraping
 - Scrapes job postings from **Wanted Korea**
@@ -34,7 +34,7 @@ Built with **FastAPI + SQLite + Streamlit**.
 - Clear all skills
 - Upload a resume PDF and automatically extract skills
 
-### ✅ Frontend Dashboard
+### Frontend Dashboard
 - Built using Streamlit (no HTML/CSS required)
 - Job list filtering with a slider (minimum score)
 - Open job URL directly
@@ -42,7 +42,7 @@ Built with **FastAPI + SQLite + Streamlit**.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Backend
 - FastAPI
@@ -50,13 +50,14 @@ Built with **FastAPI + SQLite + Streamlit**.
 - SQLite
 - Requests
 - BeautifulSoup
+- PostgreSQL
 
 ### Frontend
 - Streamlit
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 job-match-dashboard/
@@ -88,51 +89,7 @@ job-match-dashboard/
 └── README.md
 ```
 
-### ⚙️ Installation
-1. Clone the repository : 
-git clone https://github.com/YOUR_USERNAME/job-matcher.git
-
-cd job-matcher
-2. Create virtual environment : 
-python -m venv venv
-
-Activate it:
-
-Windows : venv\Scripts\activate
-
-Mac/Linux : source venv/bin/activate
-
-3. Install dependencies : 
-pip install -r requirements.txt
-
-▶️ Running the App
-1. Start the FastAPI backend
-   
-cd backend
-
-uvicorn app.main:app --reload
-
-Backend runs at:
-
-http://127.0.0.1:8000
-
-Docs available at:
-
-http://127.0.0.1:8000/docs
-
-2. Start the Streamlit frontend
-
-In a second terminal:
-
-cd frontend
-
-streamlit run Home.py
-
-Frontend runs at:
-
-http://localhost:8501
-
-### 🔥 How It Works
+### How It Works
 Step 1: Add your skills
 
 Go to the Skills page and add skills manually OR upload your resume PDF.
@@ -151,17 +108,17 @@ Open job posting using the Open Job button
 
 Click Mark Applied to update the job status in the database
 
-### 📌 Planned Improvements
+### Planned Improvements
 - Add more Korean job-posting website scraper
 - Better NLP-based skill extraction
 - Job specialty based scrapping
 - Auto-discover new skills from job descriptions
 
-### ⚠️ Disclaimer
+### Disclaimer
 
 This project is for educational and personal use only.
 Some job websites may block scraping depending on rate limits or bot detection.
 
-## 👤 Author
+## Author
 
-Built by Patrick Bastard
+Built by Patrick "Lilixe" B.
