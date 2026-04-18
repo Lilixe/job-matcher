@@ -8,6 +8,7 @@ from .deps import get_db
 from . import crud
 from typing import Optional
 
+from .config import MIN_SCORE_ALLOWED
 from .utils.resume_parser import extract_text_from_pdf
 from .scraper.wanted import scrape_wanted_jobs
 from .scraper.skill_extract import extract_skills
@@ -72,7 +73,10 @@ def scrape_wanted(limit: int = 100, min_score: float = 50.0, db: Session = Depen
         merged_skills = extract_skills(combined_text)
 
         score = compute_score(merged_skills, my_skills) # type: ignore
-
+        
+        if score < MIN_SCORE_ALLOWED:
+            continue
+        
         status = "fit" if score >= min_score else "unfit"
 
         offer = JobCreate(
