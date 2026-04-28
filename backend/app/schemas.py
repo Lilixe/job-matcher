@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Literal
 
-StatusType = Literal["applied", "interview", "offer", "rejected","unfit", "fit"]
+StatusType = Literal["applied", "interview", "offer", "rejected","unfit", "fit", "discarded"]
 
 # ── Jobs ─────────────────────────────────────────────────────────────────────
 class JobCreate(BaseModel):
