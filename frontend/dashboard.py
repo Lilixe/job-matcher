@@ -75,7 +75,7 @@ edited_df = st.data_editor(
     column_config={
         "status": st.column_config.SelectboxColumn(
             "Status",
-            options=["fit", "unfit", "applied", "rejected"],
+            options=["fit", "unfit", "applied", "rejected", "interview", "offer", "discarded"],
             required=True,
         ),
         "delete": st.column_config.CheckboxColumn("Delete?"),
