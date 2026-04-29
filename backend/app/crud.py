@@ -70,11 +70,16 @@ def get_jobs(db: Session, status: str = None, company: str = None, score: float 
     """
     query = db.query(JobApplication)
 
-    query = query.filter(JobApplication.status != "discarded")
-    query = query.filter(JobApplication.score >= score)
+    score_filter = JobApplication.score >= score
+    status_match_filter = True
 
-    if status and status != "discarded":
-        query = query.filter(JobApplication.status == status)
+    if status:
+        status_match_filter = (JobApplication.status == status)
+
+    query = query.filter(
+        JobApplication.status != "discarded",
+        or_(score_filter, status_match_filter) # type: ignore
+    )
 
     if company:
         query = query.filter(JobApplication.company.ilike(f"%{company}%"))
