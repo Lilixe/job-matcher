@@ -110,7 +110,7 @@ else:
 # ── Apply / Track ─────────────────────────────────────────────────────────────
 st.subheader("Apply / Track Jobs")
 for job in jobs:
-    if job["status"] != "applied":
+    if job["status"] in ("fit", "unfit"):
         col1, col2, col3, col4 = st.columns([3, 3, 2, 2])
         with col1:
             st.write(f"**{job['company']}**")
