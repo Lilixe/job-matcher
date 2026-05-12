@@ -60,7 +60,7 @@ def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends
         raise HTTPException(status_code=403, detail="Forbidden")   
     
     jobsWanted = scrape_wanted_jobs(limit=limit)
-    jobsIndeed = scrape_indeed_jobs(limit=limit)
+    #jobsIndeed = scrape_indeed_jobs(limit=limit)
 
     skills_db = crud.get_skills(db)
     my_skills = [s.skill for s in skills_db]
@@ -121,7 +121,7 @@ def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends
         if created:
             inserted += 1
     """
-    return {"scraped": len(jobsWanted) + len(jobsIndeed), "inserted": inserted, "min_score": min_score}
+    return {"scraped": len(jobsWanted), "inserted": inserted, "min_score": min_score}
 
 @app.get("/jobs", response_model=list[JobResponse])
 def list_jobs(
