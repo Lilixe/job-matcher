@@ -1,4 +1,4 @@
-name: Auto Scrape Wanted
+name: Auto Scrape Jobs
 
 on:
   schedule:
@@ -13,5 +13,5 @@ jobs:
     steps:
       - name: Call backend scraping endpoint
         run: |
-          curl -X POST "${{ secrets.API_URL }}/scrape/wanted?limit=200&min_score=90" \
+          curl -X POST "${{ secrets.API_URL }}/scrape?limit=100&min_score=80" \
           -H "X-Scrape-Secret: ${{ secrets.SCRAPE_SECRET }}"
