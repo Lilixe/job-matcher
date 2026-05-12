@@ -93,7 +93,7 @@ def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends
         _, created = crud.create_job(db, offer)
         if created:
             inserted += 1
-
+    """
     for job in jobsIndeed:
         desc = fetch_indeed_details(job["jobkey"])
 
@@ -120,7 +120,7 @@ def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends
         _, created = crud.create_job(db, offer)
         if created:
             inserted += 1
-
+    """
     return {"scraped": len(jobsWanted) + len(jobsIndeed), "inserted": inserted, "min_score": min_score}
 
 @app.get("/jobs", response_model=list[JobResponse])
