@@ -9,7 +9,7 @@ Built with **FastAPI + SQLite/PostgreSQL + Streamlit**.
 ## Features
 
 ### Job Scraping
-- Scrapes job postings from **Wanted Korea**
+- Scrapes job postings from **Wanted and Indeed Korea**
 - Extracts:
   - job title
   - company name
@@ -72,6 +72,7 @@ job-match-dashboard/
 │       ├── schemas.py
 │       ├── scraper/
 │       │   ├── wanted.py
+│       │   ├── indeed.py
 │       │   ├── scoring.py
 │       │   ├── skills.py
 │       │   └── skill_extract.py
@@ -94,9 +95,9 @@ Step 1: Add your skills
 
 Go to the Skills page and add skills manually OR upload your resume PDF.
 
-Step 2: Scrape Wanted jobs
+Step 2: Scrape jobs
 
-Click Scrape Wanted Jobs in the dashboard sidebar.
+Click Scrape Jobs in the dashboard sidebar.
 
 Step 3: Filter by match score
 
