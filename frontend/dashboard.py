@@ -25,18 +25,18 @@ min_score = st.sidebar.slider("Minimum match score (%)", 0, 100, st.session_stat
 st.session_state.min_score = min_score
 
 if is_admin:
-    if st.sidebar.button("Scrape Wanted Jobs"):
+    if st.sidebar.button("Scrape Jobs"):
         r = requests.post(
-            f"{API_URL}/scrape/wanted",
+            f"{API_URL}/scrape",
             params={"limit": 30, "min_score": min_score},
             headers=headers,
         )
         if r.status_code == 200:
-            st.sidebar.success("Wanted scraping done!")
+            st.sidebar.success("Scraping done!")
         else:
             st.sidebar.error("Scraping failed")
 else:
-    st.sidebar.button("Scrape Wanted Jobs", disabled=True, help="Admin only")
+    st.sidebar.button("Scrape Jobs", disabled=True, help="Admin only")
 
 # ── Fetch jobs ────────────────────────────────────────────────────────────────
 r = requests.get(f"{API_URL}/jobs", params={"score": min_score, "status": "applied"}) 

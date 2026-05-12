@@ -10,10 +10,10 @@ from typing import Optional
 
 from .config import MIN_SCORE_ALLOWED
 from .utils.resume_parser import extract_text_from_pdf
-from .scraper.wanted import scrape_wanted_jobs
+from .scraper.wanted import fetch_wanted_details, scrape_wanted_jobs
+from .scraper.indeed import fetch_indeed_details, scrape_indeed_jobs
 from .scraper.skill_extract import extract_skills
 from .scraper.scoring import compute_score
-from .scraper.wanted import fetch_wanted_details
 
 Base.metadata.create_all(bind=engine)
 
@@ -33,8 +33,8 @@ def root():
     """
     return {"message": "API running"}
 
-@app.post("/scrape/wanted")
-def scrape_wanted(limit: int = 100, min_score: float = 50.0, db: Session = Depends(get_db), x_scrape_secret: str = Header(None)):
+@app.post("/scrape/")
+def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends(get_db), x_scrape_secret: str = Header(None)):
     """
     Scrape job listings from Wanted.co.kr and store matching jobs in the database.
     
@@ -59,14 +59,15 @@ def scrape_wanted(limit: int = 100, min_score: float = 50.0, db: Session = Depen
     if not secret or x_scrape_secret != secret:
         raise HTTPException(status_code=403, detail="Forbidden")   
     
-    jobs = scrape_wanted_jobs(limit=limit)
+    jobsWanted = scrape_wanted_jobs(limit=limit)
+    jobsIndeed = scrape_indeed_jobs(limit=limit)
 
     skills_db = crud.get_skills(db)
     my_skills = [s.skill for s in skills_db]
 
     inserted = 0
 
-    for job in jobs:
+    for job in jobsWanted:
         desc, wanted_tags = fetch_wanted_details(job["id"])
 
         combined_text = f"{job['title']} {desc} {' '.join(wanted_tags)}"
@@ -93,7 +94,34 @@ def scrape_wanted(limit: int = 100, min_score: float = 50.0, db: Session = Depen
         if created:
             inserted += 1
 
-    return {"scraped": len(jobs), "inserted": inserted, "min_score": min_score}
+    for job in jobsIndeed:
+        desc = fetch_indeed_details(job["jobkey"])
+
+        combined_text = f"{job['title']} {desc}"
+        merged_skills = extract_skills(combined_text)
+
+        score = compute_score(merged_skills, my_skills) # type: ignore
+        
+        if score < MIN_SCORE_ALLOWED:
+            continue
+        
+        status = "fit" if score >= min_score else "unfit"
+
+        offer = JobCreate(
+            source="indeed",
+            title=job["title"],
+            company=job["company"],
+            url=job["url"],
+            skills=", ".join(merged_skills),
+            score=score,
+            status=status
+        )
+
+        _, created = crud.create_job(db, offer)
+        if created:
+            inserted += 1
+
+    return {"scraped": len(jobsWanted) + len(jobsIndeed), "inserted": inserted, "min_score": min_score}
 
 @app.get("/jobs", response_model=list[JobResponse])
 def list_jobs(
