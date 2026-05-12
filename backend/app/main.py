@@ -33,7 +33,7 @@ def root():
     """
     return {"message": "API running"}
 
-@app.post("/scrape/")
+@app.post("/scrape")
 def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends(get_db), x_scrape_secret: str = Header(None)):
     """
     Scrape job listings from Wanted.co.kr and store matching jobs in the database.
