@@ -9,7 +9,7 @@ Built with **FastAPI + SQLite/PostgreSQL + Streamlit**.
 ## Features
 
 ### Job Scraping
-- Scrapes job postings from **Wanted and Indeed Korea**
+- Scrapes job postings from **Wanted and Saramin Korea**
 - Extracts:
   - job title
   - company name

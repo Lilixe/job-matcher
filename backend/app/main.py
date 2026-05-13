@@ -1,4 +1,8 @@
 import os
+#from dotenv import load_dotenv
+
+#load_dotenv(os.path.join(os.path.dirname(__file__), "../.env"))
+
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Header
 from sqlalchemy.orm import Session
 
@@ -11,7 +15,7 @@ from typing import Optional
 from .config import MIN_SCORE_ALLOWED
 from .utils.resume_parser import extract_text_from_pdf
 from .scraper.wanted import fetch_wanted_details, scrape_wanted_jobs
-from .scraper.indeed import fetch_indeed_details, scrape_indeed_jobs
+from .scraper.saramin import fetch_saramin_details, scrape_saramin_jobs
 from .scraper.skill_extract import extract_skills
 from .scraper.scoring import compute_score
 
@@ -34,7 +38,7 @@ def root():
     return {"message": "API running"}
 
 @app.post("/scrape")
-def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends(get_db), x_scrape_secret: str = Header(None)):
+def scrape_jobs(limit: int = 50, min_score: float = 80.0, db: Session = Depends(get_db), x_scrape_secret: str = Header(None)):
     """
     Scrape job listings from Wanted.co.kr and store matching jobs in the database.
     
@@ -42,8 +46,8 @@ def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends
     against user skills, and stores jobs with "fit" or "unfit" status based on the minimum score threshold.
     
     Args:
-        limit (int, optional): Maximum number of jobs to scrape. Defaults to 30.
-        min_score (float, optional): Minimum match score threshold. Jobs with score >= min_score are marked as "fit". Defaults to 50.0.
+        limit (int, optional): Maximum number of jobs to scrape. Defaults to 50.
+        min_score (float, optional): Minimum match score threshold. Jobs with score >= min_score are marked as "fit". Defaults to 80.0.
         db (Session): Database session dependency.
         x_scrape_secret (str, optional): Secret header for scraping authorization.
     
@@ -53,14 +57,22 @@ def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends
             - inserted (int): Jobs successfully stored in database
     
     Example:
-        POST /scrape/wanted?limit=20&min_score=60 -> {"scraped": 20, "inserted": 15}
+        POST /scrape?limit=20&min_score=60 -> {"scraped": 20, "inserted": 15}
     """
     secret = os.getenv("SCRAPE_SECRET")
     if not secret or x_scrape_secret != secret:
         raise HTTPException(status_code=403, detail="Forbidden")   
     
-    jobsWanted = scrape_wanted_jobs(limit=limit)
-    #jobsIndeed = scrape_indeed_jobs(limit=limit)
+    jobsWanted = []
+    try:
+        jobsWanted = scrape_wanted_jobs(limit=limit)
+    except Exception as e:
+        print("Wanted scraping failed:", e)
+    jobsSaramin = []
+    try:
+        jobsSaramin = scrape_saramin_jobs(limit=limit)
+    except Exception as e:
+        print("Saramin scraping failed:", e)
 
     skills_db = crud.get_skills(db)
     my_skills = [s.skill for s in skills_db]
@@ -93,9 +105,9 @@ def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends
         _, created = crud.create_job(db, offer)
         if created:
             inserted += 1
-    """
-    for job in jobsIndeed:
-        desc = fetch_indeed_details(job["jobkey"])
+    
+    for job in jobsSaramin:
+        desc = fetch_saramin_details(job["id"])
 
         combined_text = f"{job['title']} {desc}"
         merged_skills = extract_skills(combined_text)
@@ -108,7 +120,7 @@ def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends
         status = "fit" if score >= min_score else "unfit"
 
         offer = JobCreate(
-            source="indeed",
+            source="Saramin",
             title=job["title"],
             company=job["company"],
             url=job["url"],
@@ -120,8 +132,8 @@ def scrape_jobs(limit: int = 100, min_score: float = 50.0, db: Session = Depends
         _, created = crud.create_job(db, offer)
         if created:
             inserted += 1
-    """
-    return {"scraped": len(jobsWanted), "inserted": inserted, "min_score": min_score}
+    
+    return {"scraped": len(jobsWanted) + len(jobsSaramin), "inserted": inserted, "min_score": min_score}
 
 @app.get("/jobs", response_model=list[JobResponse])
 def list_jobs(
